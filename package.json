@@ -6,6 +6,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "fs": "^0.0.1-security",
+    "mysql2": "^3.6.0",
     "next": "latest",
     "react": "18.2.0",
     "react-dom": "18.2.0"
