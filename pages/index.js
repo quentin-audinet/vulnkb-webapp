@@ -4,16 +4,18 @@ import styles from '../styles/Home.module.css';
 import { useEffect, useState } from 'react';
 import NUSLogo from "../public/logo_nus.png"
 
+// Highlight some text
 const highlight = (text, needle) => {
   if (text === undefined || text === null) return (text);
   let parts = String(text).split(RegExp(needle, "gi"));
+  let id = 0;
 
   return (
     <div>
       {parts[0]}
       {
         parts.slice(1).map((part) => (
-         <span><b className={styles.highlight}>{needle}</b>{part}</span>
+         <span key={id++}><b className={styles.highlight}>{needle}</b>{part}</span>
         ))
       }
     </div>
@@ -28,7 +30,8 @@ const changeState = (button) => {
 
 // Return true if the according column is selected
 const isColumnSelected = (column) => {
-  return document.getElementById(column).getAttribute("select") === "true";
+  let element = document.getElementById(column);
+  return element ? element.getAttribute("select") === "true" : false;
 }
 
 // Return the columns used to filter
@@ -47,21 +50,25 @@ const getTableName = () => {
 // If data is empty, display a nothing message
 // The table is formatted independantly of the fetched table in the database
 const createTable = (columns, data, filter, fetchData) => {
+
+  const tableHeader = (<thead>
+    <tr key="idxs">
+      {
+        // Get column names and create selection buttons
+        columns.map((index) => (
+          <th key={`idx_${index}`} className={styles.cells}><button id={index} select={isColumnSelected(index) ? "true" : "false"} className={styles.columnSelector} onClick={(e) => {changeState(e.target);fetchData(filter)}}>{index}</button></th>
+        ))
+      }
+    </tr>
+    </thead>);
+
   // Check is data is empty
   if (data[0] !== undefined && columns.length > 0) {
     
     return (
       <table className={`${styles.cells} ${styles.table}`}>
-        <thead>
-        <tr key="idxs">
-          {
-            // Get column names and create selection buttons
-            columns.map((index) => (
-              <th key={`idx_${index}`} className={styles.cells}><button id={index} select="false" className={styles.columnSelector} onClick={(e) => {changeState(e.target);fetchData(filter)}}>{index}</button></th>
-            ))
-          }
-        </tr>
-        </thead>
+        {tableHeader}
+        
         <tbody>
         {
           // Go through the table and create cells
@@ -78,7 +85,7 @@ const createTable = (columns, data, filter, fetchData) => {
     )
     } else {
       // data is empty
-      return (<table><tbody><tr>Nothing to display !</tr></tbody></table>)
+      return (<div><table className={`${styles.cells} ${styles.table}`}>{tableHeader}<tbody><tr></tr></tbody></table><p className={styles.noResult}>Nothing to display !</p></div>)
     }
 }
 
@@ -88,12 +95,13 @@ const Home = () => {
   let updateTable;
 
   // States used for dynamic filtering
-  const [filter, setFilter] = useState('')                                               // The current filter
-  const [columns, setColumns] = useState([]);
+  const [filter, setFilter] = useState('')      // The current filter
+  const [columns, setColumns] = useState([]);   // Colums of selected table
   const [content, setContent] = useState('');   // The current HTML table to display
 
   // Get data with the filter and update the content
   fetchData = async (filter) => {
+    if (getTableName() === "default") return;
     const cols=getSelectedColumns();
     const res = await fetch(`/api/db_query`, {
       method: "post",
@@ -142,8 +150,8 @@ const Home = () => {
 
         <h1 className={styles.title}>
           Query the &nbsp;
-          <select className={styles.tableSelector} id="table_selector" type="list" onChange={(e) => updateTable(e.target.value)} >
-            <option disabled > -- select a table -- </option>
+          <select defaultValue="default" className={styles.tableSelector} id="table_selector" type="list" onChange={(e) => updateTable(e.target.value)} >
+            <option disabled value="default"> -- select a table -- </option>
             <option value="attack_ddos">Attack DDoS</option>
             <option value="attack_bof">Attack BoF</option>
           </select>
@@ -154,7 +162,7 @@ const Home = () => {
         <input className={styles.filter_input} id="query_input" type="text" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder='Filter' />
         
 
-        <div>{content}</div>
+        <div className={styles.tableContainer}>{content}</div>
       </main>
 
 

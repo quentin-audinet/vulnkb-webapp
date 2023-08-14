@@ -42,6 +42,16 @@
   padding: 10px;
 }
 
+.tableContainer {
+  width: 100%;
+  display: block;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
 .table tr:nth-child(even) td {
   background-color: #f2f2f2;
 }
@@ -52,6 +62,12 @@
 
 .table th {
   background-color: #eeddcc ;
+}
+
+.noResult {
+  width: 100%;
+  text-align: center;
+  font-size: xx-large;
 }
 
 .filter_input {

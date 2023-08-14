@@ -16,16 +16,16 @@ export default async function handler(req, res) {
     }
 
     else if ( action === "filter" ) {
-        const { filter, columns } = JSON.parse(req.body);
+        const { filter, cols } = JSON.parse(req.body);
 
         query = "SELECT * FROM ??";
         values = [table];
 
-        if (columns && columns.length > 0) {
+        if (cols && cols.length > 0) {
             query += " WHERE ";
-            columns.map((col) => {query += `${col} LIKE ? OR `})
+            cols.map((col) => {query += `${col} LIKE ? OR `})
             query = query.substring(0, query.length - 4);   // Remove the last ' OR '
-            values = values.concat([...Array(columns.length)].fill(`%${filter}%`));
+            values = values.concat([...Array(cols.length)].fill(`%${filter}%`));
         }
 
     }
