@@ -7,17 +7,6 @@
   align-items: center;
 }
 
-.title a {
-  color: #0070f3;
-  text-decoration: none;
-}
-
-.title a:hover,
-.title a:focus,
-.title a:active {
-  text-decoration: underline;
-}
-
 .title {
   margin: 0 0 1rem;
   line-height: 1.15;
@@ -83,16 +72,7 @@
   font: inherit;
   cursor: pointer;
   outline: inherit;
-}
-
-.option {
-  background: green;
-  color: blue;
-  padding: 10px;
-  border: none;
-  font: inherit;
-  cursor: pointer;
-  outline: inherit;
+  text-align: center;
 }
 
 .highlight {

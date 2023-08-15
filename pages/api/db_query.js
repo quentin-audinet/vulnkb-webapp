@@ -1,36 +1,62 @@
 import executeQuery from "./db";
 
+// Build the condition for the SQL request from the quey in a logical format
+// Ex: A && B || C => WHERE X LIKE A AND X LIKE B OR X LIKE C
+const buildLogicalQuery = (filter_query, selected_columns) => {
+
+    let new_query = "";
+    let new_values = [];
+
+    const splitted_query = filter_query.replace("&&", " AND ").replace("||", " OR ").replace("(", " ( ").replace(")", " ) ").split(" ").filter(x => x !== "");
+
+    for (let column of selected_columns) {
+        new_query += "(";
+        splitted_query.map((symbol) => {
+            if (symbol === "(" || symbol === ")") { new_query += symbol; }
+            else if (symbol === "AND" || symbol === "OR") { new_query += ` ${symbol} `; }
+            else {
+                new_query += `${column} LIKE ?`;    
+                new_values.push(`%${symbol}%`);
+            }
+        });
+        new_query += ") OR ";
+    }
+    new_query = new_query.substring(0, new_query.length - 4);   // Remove the last ' OR '
+
+    return {new_query, new_values};
+}
+
 // Api used to filter data using the name and description entries
-// PLEASE NOTE :    the query is specific to the attack_ddos table. To scale to further tables,
-//                  it could be required to have a file with the columns to filter according to the table
 export default async function handler(req, res) {
     const { action, table } = JSON.parse(req.body);
 
     let query;
     let values;
 
+    
     if ( action === "get_all" ) {
         
-         query = "SELECT * FROM ??";
-         values = [table];
+        query = "SELECT * FROM ??";
+        values = [table];
     }
-
+    
     else if ( action === "filter" ) {
         const { filter, cols, limit, currentPage } = JSON.parse(req.body);
-
+        
         query = "SELECT * FROM ??";
         values = [table];
 
-        if (cols && cols.length > 0) {
+        if (cols && cols.length > 0 && filter !== "") {
             query += " WHERE ";
-            cols.map((col) => {query += `${col} LIKE ? OR `})
-            query = query.substring(0, query.length - 4);   // Remove the last ' OR '
-            values = values.concat([...Array(cols.length)].fill(`%${filter}%`));
+            const {new_query, new_values} = buildLogicalQuery(filter, cols);
+            query += new_query;
+            values = values.concat(new_values);
         }
 
         query += " LIMIT ?, ?";
         values.push((currentPage-1)*limit);
         values.push(limit);
+        console.log(query, values)
 
     }
 
