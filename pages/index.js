@@ -3,6 +3,10 @@ import Image from 'next/image';
 import styles from '../styles/Home.module.css';
 import { useEffect, useState } from 'react';
 import NUSLogo from "../public/logo_nus.png"
+import PageSelector from '../components/PageSelector';
+import HomeTitle from '../components/HomeTitle';
+import Filter from '../components/Filter';
+import TableHeader from '../components/TableHeader';
 
 // Highlight some text
 const highlight = (text, needle) => {
@@ -51,16 +55,12 @@ const getTableName = () => {
 // The table is formatted independantly of the fetched table in the database
 const createTable = (columns, data, filter, fetchData) => {
 
-  const tableHeader = (<thead>
-    <tr key="idxs">
-      {
-        // Get column names and create selection buttons
-        columns.map((index) => (
-          <th key={`idx_${index}`} className={styles.cells}><button id={index} select={isColumnSelected(index) ? "true" : "false"} className={styles.columnSelector} onClick={(e) => {changeState(e.target);fetchData(filter)}}>{index}</button></th>
-        ))
-      }
-    </tr>
-    </thead>);
+  const tableHeader =
+  <TableHeader 
+    columns={columns}
+    isColumnSelected={isColumnSelected}
+    onColumnClicked={(col) => {changeState(col);fetchData(filter)}}
+  />;
 
   // Check is data is empty
   if (data[0] !== undefined && columns.length > 0) {
@@ -73,7 +73,7 @@ const createTable = (columns, data, filter, fetchData) => {
         {
           // Go through the table and create cells
           data.map((row) => (
-          <tr key={`elem_+${row['id']}`}>
+          <tr key={`${row['id']}`}>
             {columns.map((index) => (
             <td key={index+row['id']} className={styles.cells}>{filter && filter.length >= 2 && isColumnSelected(index) ? highlight(row[index], filter) : row[index]}</td>
           ))}
@@ -98,25 +98,49 @@ const Home = () => {
   const [filter, setFilter] = useState('')      // The current filter
   const [columns, setColumns] = useState([]);   // Colums of selected table
   const [content, setContent] = useState('');   // The current HTML table to display
+  const [itemsNumber, setItemsNumber] = useState(25); // Number of items by page
+  const [currentPage, setCurrentPage] = useState(1);  // The current page
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPage, setTotalPage] = useState(Math.ceil(totalItems / itemsNumber));
+  const [table, setTable] = useState('default')
 
   // Get data with the filter and update the content
   fetchData = async (filter) => {
     if (getTableName() === "default") return;
-    const cols=getSelectedColumns();
+
+    const selected_columns=getSelectedColumns();
+
     const res = await fetch(`/api/db_query`, {
       method: "post",
       body: JSON.stringify({
         "action": "filter",
         filter,
-        cols,
-        table: getTableName()
+        cols: selected_columns,
+        table: getTableName(),
+        limit: itemsNumber,
+        currentPage
       })
     });
     const newData = await res.json();
+
+
+    const res_count = await fetch(`/api/db_query`, {
+      method: "post",
+      body: JSON.stringify({
+        "action": "count",
+        filter,
+        cols: selected_columns,
+        table: getTableName()
+      })
+    });
+    const count = (await res_count.json())[0]["COUNT(*)"];
+    setTotalItems(count);
+
     setContent(createTable(columns, newData, filter, fetchData));
   };
 
-  updateTable = async (table) => {
+  updateTable = async (new_table) => {
+    setTable(new_table)
     const res = await fetch(`/api/db_query`, {
       method: "post",
       body: JSON.stringify({
@@ -124,18 +148,40 @@ const Home = () => {
         table,
       })
     });
-    const newColumns = (await res.json()).map((c) => (c["column_name"]));
-    setColumns(newColumns);
+    
   }
 
-  // Allows instant refresh
+  // Refresh data when the query, the columns, the number of items per page or the page have changed
   useEffect(() => {
     fetchData(filter);
-  }, [filter]);
+  }, [filter, columns, itemsNumber, currentPage]);
 
+  // Change the PageSelector when either the total of all items or the amount of items per page have changed
   useEffect(() => {
-    fetchData(filter);
-  }, [columns]);
+    setTotalPage(Math.ceil(totalItems / itemsNumber));
+  }, [totalItems, itemsNumber]);
+
+  // When the table has changed, get the new columns and update the content
+  useEffect(() => {
+    const fetch_columns = async () => {
+      const res = await fetch(`/api/db_query`, {
+        method: "post",
+        body: JSON.stringify({
+          "action": "get_columns",
+          table,
+        })
+      });
+      const newColumns = (await res.json()).map((c) => (c["column_name"]));
+      setColumns(newColumns);
+    }
+    fetch_columns();
+  }, [table]);
+
+  // After updating columns, go back to first page
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [columns])
+
   
 
   return (
@@ -148,21 +194,32 @@ const Home = () => {
 
       <main>
 
-        <h1 className={styles.title}>
-          Query the &nbsp;
-          <select defaultValue="default" className={styles.tableSelector} id="table_selector" type="list" onChange={(e) => updateTable(e.target.value)} >
-            <option disabled value="default"> -- select a table -- </option>
-            <option value="attack_ddos">Attack DDoS</option>
-            <option value="attack_bof">Attack BoF</option>
-          </select>
-          &nbsp;table
-        </h1>
+        <HomeTitle
+          currentTable={table}
+          onTableChange={setTable}
+        />
 
         
-        <input className={styles.filter_input} id="query_input" type="text" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder='Filter' />
+        <Filter
+          filter={filter}
+          onFilterChange={setFilter}
+        />
         
 
         <div className={styles.tableContainer}>{content}</div>
+        <div>
+          <PageSelector
+            totalPage={totalPage}
+            currentPage={currentPage}
+            onPageChange={(page) => {setCurrentPage(page)}}
+          />
+          <select value={itemsNumber} onChange={(e) => {setItemsNumber(parseInt(e.target.value)); setCurrentPage(1)}}>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
       </main>
 
 
