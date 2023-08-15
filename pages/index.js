@@ -6,7 +6,6 @@ import NUSLogo from "../public/logo_nus.png"
 import PageSelector from '../components/PageSelector';
 import HomeTitle from '../components/HomeTitle';
 import Filter from '../components/Filter';
-import TableHeader from '../components/TableHeader';
 import DataTable from '../components/DataTable';
 
 
@@ -16,6 +15,11 @@ const getSelectedColumns = () => {
   for (let col of document.getElementsByClassName(styles.columnSelector))
     if (col.getAttribute("select") === "true") cols.push(col.id);
   return cols;
+}
+
+const resetColumnsState = () => {
+  for (let col of document.getElementsByClassName(styles.columnSelector))
+    if (col.getAttribute("select") === "true") col.setAttribute("select", "false");
 }
 
 const Home = () => {
@@ -88,6 +92,7 @@ const Home = () => {
       });
       const newColumns = (await res.json()).map((c) => (c["column_name"]));
       setColumns(newColumns);
+      resetColumnsState();
     }
     fetch_columns();
   }, [table]);
@@ -130,20 +135,20 @@ const Home = () => {
           />
         </div>
 
-        <div>
-          <PageSelector
-            totalPage={totalPage}
-            currentPage={currentPage}
-            onPageChange={(page) => {setCurrentPage(page)}}
-          />
 
-          <select value={itemsNumber} onChange={(e) => {setItemsNumber(parseInt(e.target.value)); setCurrentPage(1)}}>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-        </div>
+        
+        <PageSelector
+          totalPage={totalPage}
+          currentPage={currentPage}
+          onPageChange={(page) => {setCurrentPage(page)}}
+        />
+
+        <select className={styles.pageSizeSelector} value={itemsNumber} onChange={(e) => {setItemsNumber(parseInt(e.target.value)); setCurrentPage(1)}}>
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+        </select>
       </main>
 
 

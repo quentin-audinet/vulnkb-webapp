@@ -10,9 +10,13 @@ const PageSelector = ({totalPage, currentPage, onPageChange}) => {
     return (
         <nav>
             <ul className={styles.pagination}>
-                <li key="first">
-                    &lt;&lt;
-                </li>
+                {
+                    currentPage !== 1 && (
+                    <li key="first" onClick={() => onPageChange(1)}>
+                        1 ... &lt;&lt;
+                    </li>
+                    )
+                }
 
                 {   
                     pageNumbers.map((page) => (
@@ -26,9 +30,13 @@ const PageSelector = ({totalPage, currentPage, onPageChange}) => {
                     ))
                 }
 
-                <li key="last">
-                    &gt;&gt;
-                </li>
+                {
+                    (currentPage !== totalPage && totalPage !== 0) && (
+                    <li key="last" onClick={() => onPageChange(totalPage)}>
+                        &gt;&gt; ... {totalPage}
+                    </li>
+                    )
+                }
             </ul>
         </nav>
     );
