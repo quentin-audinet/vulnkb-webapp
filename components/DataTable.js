@@ -13,7 +13,7 @@ const isColumnSelected = (column) => {
     return element ? element.getAttribute("select") === "true" : false;
 }
 
-const DataTable = ({ columns, data, filter, fetchData }) => {
+const DataTable = ({ columns, sortedColumn, data, filter, fetchData, onSortedColumnChange }) => {
 
     return (
     <table className={`${styles.cells} ${styles.table}`}>
@@ -22,6 +22,8 @@ const DataTable = ({ columns, data, filter, fetchData }) => {
             columns={columns}
             isColumnSelected={isColumnSelected}
             onColumnClicked={(col) => {changeState(col);fetchData(filter)}}
+            onSortedColumnChange={(column, state) => onSortedColumnChange({column, state})}
+            sortedColumn={sortedColumn}
         />
 
         {

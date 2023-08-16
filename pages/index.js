@@ -35,6 +35,7 @@ const Home = () => {
   const [totalPage, setTotalPage] = useState(Math.ceil(totalItems / itemsNumber));
   const [table, setTable] = useState('default')
   const [data, setData] = useState([])
+  const [sortedColumn, setSortedColumn] = useState({id: "up"});
 
   // Get data with the filter and update the content
   fetchData = async (filter) => {
@@ -53,7 +54,8 @@ const Home = () => {
         cols: selected_columns,
         table,
         limit: itemsNumber,
-        currentPage
+        currentPage,
+        order: sortedColumn
       })
     });
     const newData = await res.json();
@@ -76,7 +78,7 @@ const Home = () => {
   // Refresh data when the query, the columns, the number of items per page or the page have changed
   useEffect(() => {
     fetchData(filter);
-  }, [filter, columns, itemsNumber, currentPage]);
+  }, [filter, columns, itemsNumber, currentPage, sortedColumn]);
 
   // Change the PageSelector when either the total of all items or the amount of items per page have changed
   useEffect(() => {
@@ -96,6 +98,7 @@ const Home = () => {
       const newColumns = (await res.json()).map((c) => (c["column_name"]));
       setColumns(newColumns);
       resetColumnsState();
+      setSortedColumn({});
     }
     fetch_columns();
   }, [table]);
@@ -132,9 +135,11 @@ const Home = () => {
         <div className={styles.tableContainer}>
           <DataTable
             columns={columns}
+            sortedColumn={sortedColumn}
             data={data}
             filter={filter}
             fetchData={fetchData}
+            onSortedColumnChange={setSortedColumn}
           />
         </div>
         

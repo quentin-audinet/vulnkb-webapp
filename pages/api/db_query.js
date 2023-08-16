@@ -53,10 +53,16 @@ export default async function handler(req, res) {
             values = values.concat(new_values);
         }
 
+        const { order } = JSON.parse(req.body);
+        if (order.column) {
+            query += ` ORDER BY ${order.column} ${order.state === "up" ? "DESC" : "ASC"}`;
+        }
+
         query += " LIMIT ?, ?";
+
         values.push((currentPage-1)*limit);
         values.push(limit);
-
+                
     }
 
     else if ( action === "get_columns" ) {

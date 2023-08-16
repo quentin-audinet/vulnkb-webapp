@@ -89,10 +89,24 @@
   font: inherit;
   cursor: pointer;
   outline: inherit;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
 .columnSelector[select^="true"] {
   background-color: #ccbbaa;
+}
+
+.columnSelector span {
+  flex: 1;
+  padding: 10px;
+  pointer-events: none;
+}
+
+.sortTriangle {
+  flex: 0;
 }
 
 .pagination {

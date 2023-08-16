@@ -2,6 +2,7 @@ import styles from '../styles/Home.module.css';
 
 const highlight = (text, filter) => {
   // Transform filter into a regex TODO
+  text = String(text);
   while (filter.endsWith("&") ||
         filter.endsWith("|") ||
         filter.endsWith("(") ||
@@ -14,7 +15,7 @@ const highlight = (text, filter) => {
   const highlighted = parts.map((part, index) => (
     regex.test(part) ? <span key={index}><b className={styles.highlight}>{part}</b></span> : <span key={index}>{part}</span>
   ));
-  
+
   return highlighted;
 }
 
