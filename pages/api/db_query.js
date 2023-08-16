@@ -1,4 +1,4 @@
-import executeQuery from "./db";
+import executeQuery from "../../lib/db";
 
 // Build the condition for the SQL request from the quey in a logical format
 // Ex: A && B || C => WHERE X LIKE A AND X LIKE B OR X LIKE C
