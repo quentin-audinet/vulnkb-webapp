@@ -7,7 +7,7 @@ const buildLogicalQuery = (filter_query, selected_columns) => {
     let new_query = "";
     let new_values = [];
 
-    const splitted_query = filter_query.replace("&&", " AND ").replace("||", " OR ").replace("(", " ( ").replace(")", " ) ").split(" ").filter(x => x !== "");
+    const splitted_query = filter_query.replaceAll("&&", " AND ").replaceAll("||", " OR ").replaceAll("(", " ( ").replaceAll(")", " ) ").split(" ").filter(x => x !== "");
 
     for (let column of selected_columns) {
         new_query += "(";
@@ -56,7 +56,6 @@ export default async function handler(req, res) {
         query += " LIMIT ?, ?";
         values.push((currentPage-1)*limit);
         values.push(limit);
-        console.log(query, values)
 
     }
 
@@ -71,11 +70,11 @@ export default async function handler(req, res) {
         query = "SELECT COUNT(*) FROM ??";
         values = [table];
 
-        if (cols && cols.length > 0) {
+        if (cols && cols.length > 0 && filter !== "") {
             query += " WHERE ";
-            cols.map((col) => {query += `${col} LIKE ? OR `})
-            query = query.substring(0, query.length - 4);   // Remove the last ' OR '
-            values = values.concat([...Array(cols.length)].fill(`%${filter}%`));
+            const {new_query, new_values} = buildLogicalQuery(filter, cols);
+            query += new_query;
+            values = values.concat(new_values);
         }
     }
 

@@ -39,6 +39,9 @@ const Home = () => {
   // Get data with the filter and update the content
   fetchData = async (filter) => {
     if (table === "default") return;
+    if (filter.trim().endsWith("&") ||
+        filter.trim().endsWith("|") ||
+        filter.trim().endsWith("(")) return
 
     const selected_columns=getSelectedColumns();
 
@@ -134,14 +137,14 @@ const Home = () => {
             fetchData={fetchData}
           />
         </div>
-
-
         
-        <PageSelector
-          totalPage={totalPage}
-          currentPage={currentPage}
-          onPageChange={(page) => {setCurrentPage(page)}}
-        />
+        <div>
+          <PageSelector
+            totalPage={totalPage}
+            currentPage={currentPage}
+            onPageChange={(page) => {setCurrentPage(page)}}
+          />
+        </div>
 
         <select className={styles.pageSizeSelector} value={itemsNumber} onChange={(e) => {setItemsNumber(parseInt(e.target.value)); setCurrentPage(1)}}>
           <option value={10}>10</option>

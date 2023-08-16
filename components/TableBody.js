@@ -1,22 +1,22 @@
 import styles from '../styles/Home.module.css';
 
-// Highlight some text
-const highlight = (text, needle) => {
-    if (text === undefined || text === null) return (text);
-    let parts = String(text).split(RegExp(needle, "gi"));
-    let id = 0;
-  
-    return (
-      <div>
-        {parts[0]}
-        {
-          parts.slice(1).map((part) => (
-           <span key={id++}><b className={styles.highlight}>{needle}</b>{part}</span>
-          ))
+const highlight = (text, filter) => {
+  // Transform filter into a regex TODO
+  while (filter.endsWith("&") ||
+        filter.endsWith("|") ||
+        filter.endsWith("(") ||
+        filter.endsWith(" ")) {
+          filter = filter.replace(/.$/,'');
         }
-      </div>
-    )
-  }
+  let regex = new RegExp(`(${filter.replaceAll("&&", "|").replaceAll("||", "|").replaceAll(" ", "")})`, 'gi');
+
+  const parts = text.split(regex);
+  const highlighted = parts.map((part, index) => (
+    regex.test(part) ? <span key={index}><b className={styles.highlight}>{part}</b></span> : <span key={index}>{part}</span>
+  ));
+  
+  return highlighted;
+}
 
 const TableBody = ({ data, columns, filter, isColumnSelected}) => {
 
