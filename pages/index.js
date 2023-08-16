@@ -42,7 +42,7 @@ const Home = () => {
     if (table === "default") return;
     if (filter.trim().endsWith("&") ||
         filter.trim().endsWith("|") ||
-        filter.trim().endsWith("(")) return
+        filter.trim().endsWith("(")) return;
 
     const selected_columns=getSelectedColumns();
 

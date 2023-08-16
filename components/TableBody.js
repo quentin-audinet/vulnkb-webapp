@@ -3,6 +3,7 @@ import styles from '../styles/Home.module.css';
 const highlight = (text, filter) => {
   // Transform filter into a regex TODO
   text = String(text);
+  filter = filter.replaceAll(/(\w+,)*\w+:/g, '');
   while (filter.endsWith("&") ||
         filter.endsWith("|") ||
         filter.endsWith("(") ||
@@ -18,7 +19,6 @@ const highlight = (text, filter) => {
 
   return highlighted;
 }
-
 
 const TableBody = ({ data, columns, filter, isColumnSelected}) => {
 
