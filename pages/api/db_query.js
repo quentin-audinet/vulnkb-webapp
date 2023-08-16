@@ -9,20 +9,42 @@ const buildLogicalQuery = (filter_query, selected_columns) => {
 
     const splitted_query = filter_query.replaceAll("&&", " AND ").replaceAll("||", " OR ").replaceAll("(", " ( ").replaceAll(")", " ) ").split(" ").filter(x => x !== "");
 
-    for (let column of selected_columns) {
-        new_query += "(";
-        splitted_query.map((symbol) => {
-            if (symbol === "(" || symbol === ")") { new_query += symbol; }
-            else if (symbol === "AND" || symbol === "OR") { new_query += ` ${symbol} `; }
-            else {
-                new_query += `${column} LIKE ?`;    
-                new_values.push(`%${symbol}%`);
-            }
-        });
-        new_query += ") OR ";
-    }
-    new_query = new_query.substring(0, new_query.length - 4);   // Remove the last ' OR '
+    new_query += "(";
 
+    splitted_query.map((symbol) => {
+
+        if (symbol === "(" || symbol === ")") { new_query += symbol; }
+
+        else if (symbol === "AND" || symbol === "OR") { new_query += ` ${symbol} `; }
+
+        else {
+            // Get columns to filter on
+            let selection = symbol.split(':');
+            // If nothing was specified, loop over all selected columns
+            if (selection.length === 1) {
+                new_query += "(";
+                selected_columns.map((column) => {
+                    new_query += `${column} LIKE ? OR `;
+                    new_values.push(`%${selection[0]}%`);
+                });
+                new_query = new_query.substring(0, new_query.length - 4);   // Remove the last ' OR '
+                new_query += ")";
+            }
+            // Add the condition for all selected columns
+            else {
+                let selected_cols = selection[0].split(',');
+                new_query += "(";
+                selected_cols.map((column) => {
+                    new_query += `${column} LIKE ? OR `;
+                    new_values.push(`%${selection[1]}%`);
+                });
+                new_query = new_query.substring(0, new_query.length - 4);   // Remove the last ' OR '
+                new_query += ")";
+            }        
+        }
+    });
+    new_query += ")";
+    
     return {new_query, new_values};
 }
 
@@ -62,7 +84,7 @@ export default async function handler(req, res) {
 
         values.push((currentPage-1)*limit);
         values.push(limit);
-                
+        
     }
 
     else if ( action === "get_columns" ) {

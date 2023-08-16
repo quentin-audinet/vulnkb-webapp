@@ -19,6 +19,7 @@ const highlight = (text, filter) => {
   return highlighted;
 }
 
+
 const TableBody = ({ data, columns, filter, isColumnSelected}) => {
 
     return(
