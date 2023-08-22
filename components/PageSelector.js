@@ -1,7 +1,10 @@
 import styles from '../styles/Home.module.css';
 
+// Component to select the page to display
 const PageSelector = ({totalPage, currentPage, onPageChange}) => {
 
+    // Pages +- 3 the current page are displayed
+    // There is a possibility to go to the first one and the last one
     const first = Math.max(1, currentPage - 3);
     const last = Math.min(totalPage, first+6);
 

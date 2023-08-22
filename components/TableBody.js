@@ -1,18 +1,26 @@
 import styles from '../styles/Home.module.css';
 
+// Highlight the text searched
 const highlight = (text, filter) => {
-  // Transform filter into a regex TODO
   text = String(text);
-  filter = filter.replaceAll(/(\w+,)*\w+:/g, '');
+  const SPACE = "%nbsp;";
+  // Save spaces
+  filter = filter.replace(/ +/g, ' ').replace(/(\w) (\w)/g, `$1${SPACE}$2`).replaceAll(/(\w+,)*\w+:/g, '');
+
+  // Remove the end of the query while it isn'd valid to keep previous results
   while (filter.endsWith("&") ||
         filter.endsWith("|") ||
         filter.endsWith("(") ||
         filter.endsWith(" ")) {
           filter = filter.replace(/.$/,'');
         }
-  let regex = new RegExp(`(${filter.replaceAll("&&", "|").replaceAll("||", "|").replaceAll(" ", "")})`, 'gi');
+
+  // Match on the keywords        
+  let regex = new RegExp(`(${filter.replace(/(&)+/g, "|").replaceAll(/(\|)+/g, "|").replaceAll(/( |\(|\))/g, "").replaceAll(SPACE, " ")})`, 'gi');
 
   const parts = text.split(regex);
+
+  // Replace the text with highlight
   const highlighted = parts.map((part, index) => (
     regex.test(part) ? <span key={index}><b className={styles.highlight}>{part}</b></span> : <span key={index}>{part}</span>
   ));
@@ -20,6 +28,7 @@ const highlight = (text, filter) => {
   return highlighted;
 }
 
+// Component to create the body of the table used to display the results
 const TableBody = ({ data, columns, filter, isColumnSelected}) => {
 
     return(

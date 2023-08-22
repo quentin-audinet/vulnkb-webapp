@@ -1,5 +1,6 @@
 import styles from '../styles/Home.module.css';
 
+// Component used to create the page title
 const HomeTitle = ({onTableChange, currentTable}) => {
 
     const available_tables = {"attack_ddos" : "Attack DDoS", "cwe" : "CWEs", "cve" : "CVEs"};
@@ -37,4 +38,4 @@ const HomeTitle = ({onTableChange, currentTable}) => {
     }
 }
 
-export default HomeTitle;
+export default HomeTitle;   

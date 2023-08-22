@@ -1,6 +1,7 @@
 import styles from '../styles/Home.module.css';
 import Image from 'next/image';
 
+// Component used to display the header of the table of the results
 const TableHeader = ({ columns, isColumnSelected, onColumnClicked, sortedColumn, onSortedColumnChange }) => {
 
     return <thead>

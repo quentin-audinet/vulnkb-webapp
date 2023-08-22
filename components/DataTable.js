@@ -2,7 +2,7 @@ import styles from '../styles/Home.module.css';
 import TableBody from './TableBody';
 import TableHeader from './TableHeader';
 
-// Change the stat of a column by a click on it. The state define is a column has to be filtered or not
+// Change the status of a column by a click on it. The status defines if a column has to be filtered or not
 const changeState = (button) => {
     button.setAttribute("select", button.getAttribute("select") === "true" ? "false" : "true");
 }
@@ -13,6 +13,7 @@ const isColumnSelected = (column) => {
     return element ? element.getAttribute("select") === "true" : false;
 }
 
+// Component used as a layer for the table
 const DataTable = ({ columns, sortedColumn, data, filter, fetchData, onSortedColumnChange }) => {
 
     return (
